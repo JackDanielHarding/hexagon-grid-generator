@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="style.css">
+    <meta charset="utf-8">
+    <meta name="viewport" width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0>
+    <style> body {padding: 0; margin: 0;} </style>
+    <script src="p5.js"></script>
+    <script src="main.js"></script>
+  </head>
+  <body>
+    <div class="row">
+      <div id="gui" class="column">
+        <div id="ui"> 
+          Width: <input type="number" name="width" id="width" value="24"><br>
+          Height: <input type="number" name="height" id="height" value="21"><br><br>
+
+          Colours:<br>
+          <div id="colorlist">
+            <div>
+              <input type="color" value="#4DFF64">
+              <button onclick="duplicateColor(this)">DUPLICATE</button><br>
+            </div>
+            <div>
+              <input type="color" value="#3871AD">
+              <button onclick="duplicateColor(this)">DUPLICATE</button><br>
+            </div>
+          </div>
+        </div>
+          
+        </form><br>
+
+        <button onclick="regenerate()">Generate</button><br>
+        <button onclick="addRandomColor()">Add Color</button><br>
+        <button onclick="saveGrid()">Save Grid</button><br>
+
+        <label>Load File</label>
+        <input type="file" id="grid-file" name="grid" accept="application/json">
+        <button id="load-grid-button" onclick="loadGrid()">Load Grid</button><br>
+      </div>
+      <div id="sketch-holder" class="column">
+        <!-- Our sketch will go here! -->
+      </div>
+    </div>
+  </body>
+</html>
