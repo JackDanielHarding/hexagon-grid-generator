@@ -1,63 +1,53 @@
-var CANVAS_SIZE = 1000;
-var FRAME_RATE = 60;
+const CANVAS_SIZE = 1000;
+const FRAME_RATE = 60;
 
-var BLANKET_WIDTH = 24;
-var BLANKET_HEIGHT = 21;
+let blanketWidth = 24;
+let blanketHeight = 21;
 
-var colors = new Array(0);
+let colors = new Array(0);
 
-var grid = new Array(24);
+let grid = new Array(24);
 
-const gridFileInput = document.getElementById("grid-file");
-gridFileInput.addEventListener("change", fileinputchanged, false);
+const GRID_FILE_INPUT_ELEMENT = document.getElementById("grid-file");
+GRID_FILE_INPUT_ELEMENT.addEventListener("change", fileinputchanged, false);
 function fileinputchanged() {
-  const gridFileInput = document.getElementById("load-grid-button");
-  
-  const fileList = this.files;
-  if(fileList == null){
-    gridFileInput.disabled = true
-  } else {
-    gridFileInput.disabled = false
-  }
+  const LOAD_GRID_BUTTON_ELEMENT = document.getElementById("load-grid-button");
+  LOAD_GRID_BUTTON_ELEMENT.disabled = (this.files == null) ? true : false
 }
 
 function setup(){
-  var canvas = createCanvas(CANVAS_SIZE, CANVAS_SIZE);
+  let canvas = createCanvas(CANVAS_SIZE, CANVAS_SIZE);
   canvas.parent('sketch-holder');
   frameRate(FRAME_RATE);
 
   refreshInput();
 
-  initArray();
+  for (let i = 0; i < grid.length; i++) { 
+    grid[i] = new Array(21); 
+  } 
   
   generate();
   printGrid();
 }
 
-function initArray(){
-  for (var i = 0; i < grid.length; i++) { 
-    grid[i] = new Array(21); 
-  } 
-}
-
 function addColor(color){
-  var colorList = document.getElementById("colorlist");
+  let colorList = document.getElementById("colorlist");
 
-  var colorPickerDiv = document.createElement("div");
+  let colorPickerDiv = document.createElement("div");
   
-  var colorPicker = document.createElement("INPUT");
+  let colorPicker = document.createElement("INPUT");
   colorPicker.setAttribute("type", "color");
   colorPicker.setAttribute("value", color);
   colorPickerDiv.appendChild(colorPicker);
   
-  var duplicateColorButton = document.createElement("BUTTON");
+  let duplicateColorButton = document.createElement("BUTTON");
   duplicateColorButton.innerHTML = 'DUPLICATE';
   duplicateColorButton.onclick = function() {
     addColor(color)
   }
   colorPickerDiv.appendChild(duplicateColorButton); 
 
-  var removeColorButton = document.createElement("BUTTON");
+  let removeColorButton = document.createElement("BUTTON");
   removeColorButton.innerHTML = 'REMOVE';
   removeColorButton.onclick = function() {
     colorDiv = this.parentNode
@@ -74,9 +64,9 @@ function addRandomColor(){
 }
 
 function getRandomColor() {
-  var letters = '0123456789ABCDEF';
-  var color = '#';
-  for (var i = 0; i < 6; i++) {
+  let letters = '0123456789ABCDEF';
+  let color = '#';
+  for (let i = 0; i < 6; i++) {
     color += letters[Math.floor(Math.random() * 16)];
   }
   return color;
@@ -85,7 +75,7 @@ function getRandomColor() {
 function duplicateColor(el){
   colorDiv = el.parentNode
   children = colorDiv.childNodes
-  for(var j = 0; j < children.length; j++){
+  for(let j = 0; j < children.length; j++){
     if(children[j].nodeName == "INPUT"){
       addColor(children[j].value)
     }
@@ -93,16 +83,16 @@ function duplicateColor(el){
 }
 
 function refreshInput(){
-  BLANKET_WIDTH = document.getElementById("width").value;
-  BLANKET_HEIGHT = document.getElementById("height").value;
+  blanketWidth = document.getElementById("width").value;
+  blanketHeight = document.getElementById("height").value;
 
-  var colorPickers = document.getElementById("colorlist").children;
+  let colorPickers = document.getElementById("colorlist").children;
   console.log(colorPickers);
   
   colors = new Array(0);
-  for(var i = 0; i < colorPickers.length; i++){
-    var children = colorPickers[i].childNodes
-    for(var j = 0; j < children.length; j++){
+  for(let i = 0; i < colorPickers.length; i++){
+    let children = colorPickers[i].childNodes
+    for(let j = 0; j < children.length; j++){
       if(children[j].nodeName == "INPUT"){
         console.log(children[j]);
         colors.push(children[j].value)
@@ -113,22 +103,22 @@ function refreshInput(){
 
 function generate(){
 
-  for(var y = 0; y < BLANKET_HEIGHT; y++){
-    for(var x = 0; x < BLANKET_WIDTH; x++){
+  for(let y = 0; y < blanketHeight; y++){
+    for(let x = 0; x < blanketWidth; x++){
 
-      tmpColors = new Array(0);
+      let adjacentColors = new Array(0);
 
       if(y > 0){
-        tmpColors.push(grid[x][y-1])
+        adjacentColors.push(grid[x][y-1])
       }
       if(x > 0){
-        tmpColors.push(grid[x-1][y])
+        adjacentColors.push(grid[x-1][y])
       }
 
-      tmpColors = tmpColors.concat(colors);
+      availableColors = adjacentColors.concat(colors);
       
-      var randomColour = Math.floor(Math.random() * tmpColors.length);
-      var randColour = tmpColors[randomColour]
+      let randomColour = Math.floor(Math.random() * availableColors.length);
+      let randColour = availableColors[randomColour]
 
       grid[x][y] = randColour;
     }
@@ -137,36 +127,17 @@ function generate(){
 
 function printGrid(){
   background(100);
-  stroke(0);
-  strokeWeight(2);
-  stroke(0);
-  strokeWeight(2);
   
-  var colorPickers = document.getElementById("colorlist").children;
-  var noOfColors = colorPickers.length
-  var colorCount = Array(noOfColors);
+  const SCALE = 3;
+  const HEXAGON_WIDTH = 16 * SCALE;
+  const HEXAGON_HEIGHT = 14 * SCALE;
+  const HALF_HEXAGON_HEIGHT = HEXAGON_HEIGHT / 2;
 
-  for(var i = 0; i < noOfColors; i++){
-    colorCount.push(0)
-  }
-  
-  var scale = 3
-  var HEXAGON_WIDTH = 16 * scale;
-  var HEXAGON_HEIGHT = 14 * scale;
-  var adjustment = 0;
+  for(let y = 0; y < blanketHeight; y++){
+    for(let x = 0; x < blanketWidth; x++){
 
-  for(var y = 0; y < BLANKET_HEIGHT; y++){
-    for(var x = 0; x < BLANKET_WIDTH; x++){
-
-      console.log(x + ", " + y);
-
-      hexagon(HEXAGON_WIDTH * 0.75 * x, (HEXAGON_HEIGHT * y) + adjustment, scale, color(grid[x][y]));
-
-      if (adjustment == 0){
-        adjustment += HEXAGON_HEIGHT / 2
-      } else {
-        adjustment = 0
-      }
+      let yOffset = x % 2 == 0 ? HALF_HEXAGON_HEIGHT : 0
+      drawHexagon(HEXAGON_WIDTH * 0.75 * x, (HEXAGON_HEIGHT * y) + yOffset, SCALE, color(grid[x][y]));
     }
   }
 }
@@ -176,24 +147,23 @@ function saveGrid(){
   gridJson = JSON.stringify(grid)
   console.log(gridJson);
 
-  var a = document.createElement("a");
-  var file = new Blob([gridJson], {type: 'text/plain'});
+  let a = document.createElement("a");
+  let file = new Blob([gridJson], {type: 'text/plain'});
   a.href = URL.createObjectURL(file);
   a.download = 'saved-grid.json';
   a.click();
 }
 
 function loadGrid(){
-  var selectedFile = document.getElementById('grid-file').files[0];
-  var reader = new FileReader();
+  let selectedFile = document.getElementById('grid-file').files[0];
+  let reader = new FileReader();
   reader.readAsText(selectedFile)
 
   reader.onload = function(event) {
     grid = JSON.parse(event.target.result);
 
-
-    BLANKET_WIDTH = grid.length;
-    BLANKET_HEIGHT = grid[0].length;
+    blanketWidth = grid.length;
+    blanketHeight = grid[0].length;
 
     console.log(grid);
     printGrid();
@@ -207,7 +177,7 @@ function regenerate(){
   return false;
 }
   
-function hexagon(transX, transY, s, c) {
+function drawHexagon(transX, transY, s, c) {
   noStroke()
 
   console.log(c);

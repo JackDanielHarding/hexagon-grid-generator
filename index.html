@@ -6,7 +6,6 @@
     <meta name="viewport" width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0>
     <style> body {padding: 0; margin: 0;} </style>
     <script src="p5.js"></script>
-    <script src="main.js"></script>
   </head>
   <body>
     <div class="row">
@@ -36,11 +35,13 @@
 
         <label>Load File</label>
         <input type="file" id="grid-file" name="grid" accept="application/json">
-        <button id="load-grid-button" onclick="loadGrid()">Load Grid</button><br>
+        <button id="load-grid-button" onclick="loadGrid()" disabled>Load Grid</button><br>
       </div>
       <div id="sketch-holder" class="column">
         <!-- Our sketch will go here! -->
       </div>
     </div>
+
+    <script src="main.js"></script>
   </body>
 </html>
