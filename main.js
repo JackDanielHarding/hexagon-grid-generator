@@ -70,13 +70,38 @@ function getRandomColor() {
 
 //TEST
 function testGetRandomColor(){
-  let testColor = getRandomColor();
-  let testExp = new RegExp("#([0-9]|[A-F]){6}");
-  if (!testExp.test(testColor)){
+  const testColor = getRandomColor();
+  if (!isHexCode(testColor)){
     throw new Error("Randomly generated hex color is in the wrong format");
   }
 }
 testGetRandomColor();
+
+function isHexCode(code){
+  const hexCodeExp = new RegExp("^#[01234567890ABCDEFabcdef]{6}$");
+  if (hexCodeExp.test(code)){
+    return true;
+  }
+  return false;
+}
+
+//TEST
+function testHexCode(){
+  const validHexCodes = ["#FFFFFF", "#ffffff", "#000000", "#999999", "#AAAAAA", "#aaaaaa", "#de3a5a"];
+  for(let code of validHexCodes){
+    if(!isHexCode(code)){
+      throw new Error("correct hex code is failing hex code check: " + code);
+    }
+  }
+
+  const invalidHexCodes = ["#FFFFFFF", "FFFFFF", "#FFFFF", "#ABCDEG", "#abcdeg"];
+  for(let code of invalidHexCodes){
+    if(isHexCode(code)){
+      throw new Error("incorrect hex code is passing hex code check: " + code);
+    }
+  }
+}
+testHexCode();
 
 function duplicateColor(el){
   colorDiv = el.parentNode
@@ -173,15 +198,71 @@ function loadGrid(){
   reader.readAsText(selectedFile)
 
   reader.onload = function(event) {
-    let grid = JSON.parse(event.target.result);
+    
+    let grid;
+    
+    try{
+      grid = JSON.parse(event.target.result);
+    } catch (e){
+      if(e instanceof SyntaxError){
+        alert("File selected is not a save file")
+        return;
+      } else {
+        throw e;
+      }
+    }
+
+    if (!isValidGrid(grid)){
+      alert("File selected is not a valid save file")
+      return;
+    }
 
     blanketWidth = grid.length;
     blanketHeight = grid[0].length;
 
-    console.log(grid);
     printGrid(grid);
   }
 }
+
+function isValidGrid(grid){
+  if(!Array.isArray(grid)){
+    console.log("grid is not array");
+    return false;
+  }
+  for (let row of grid){
+    if (!Array.isArray(row)){
+      console.log("row is not array");
+      return false;
+    }
+    for (let hex of row){
+      if (!isHexCode(hex)){
+        console.log("cell is not hex");
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+//TEST
+function testIsValidGrid(){
+  const validGrid = [["#FFFFFF", "#FFFFFF", "#FFFFFF"], ["#FFFFFF", "#FFFFFF", "#FFFFFF"], ["#FFFFFF", "#FFFFFF", "#FFFFFF"]];
+  if(!isValidGrid(validGrid)){
+    throw new Error("valid grid is faling isValidGrid check: " + validGrid)
+  }
+
+  const invalidGrid1 = "#FFFFFF";
+  const invalidGrid2 = [["#FFFFFF", "#FFFFFF", "#FFFFFF"], "#FFFFFF", ["#FFFFFF", "#FFFFFF", "#FFFFFF"]];
+  const invalidGrid3 = [["#FFFFFF", "ZZZZZZ", "#FFFFFF"], ["#FFFFFF", "#FFFFFF", "#FFFFFF"], ["#FFFFFF", "#FFFFFF", "#FFFFFF"]];
+  const invalidGrids = [invalidGrid1, invalidGrid2, invalidGrid3];
+
+  for (let grid of invalidGrids){
+    if(isValidGrid(grid)){
+      throw new Error("valid grid is faling isValidGrid check: " + validGrid)
+    }
+  }
+}
+testIsValidGrid();
 
 function regenerate(){
   refreshInput();
