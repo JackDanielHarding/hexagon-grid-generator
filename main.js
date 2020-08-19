@@ -1,3 +1,5 @@
+"use strict";
+
 const CANVAS_SIZE = 1000;
 const FRAME_RATE = 60;
 
@@ -5,8 +7,6 @@ let blanketWidth = 24;
 let blanketHeight = 21;
 
 let colors = new Array(0);
-
-let grid = new Array(24);
 
 const GRID_FILE_INPUT_ELEMENT = document.getElementById("grid-file");
 GRID_FILE_INPUT_ELEMENT.addEventListener("change", fileinputchanged, false);
@@ -21,16 +21,12 @@ function setup(){
   frameRate(FRAME_RATE);
 
   refreshInput();
-
-  for (let i = 0; i < grid.length; i++) { 
-    grid[i] = new Array(21); 
-  } 
   
-  generate();
-  printGrid();
+  let grid = generateGrid();
+  printGrid(grid);
 }
 
-function addColor(color){
+function addColorPicker(color){
   let colorList = document.getElementById("colorlist");
 
   let colorPickerDiv = document.createElement("div");
@@ -43,7 +39,7 @@ function addColor(color){
   let duplicateColorButton = document.createElement("BUTTON");
   duplicateColorButton.innerHTML = 'DUPLICATE';
   duplicateColorButton.onclick = function() {
-    addColor(color)
+    addColorPicker(color)
   }
   colorPickerDiv.appendChild(duplicateColorButton); 
 
@@ -59,8 +55,8 @@ function addColor(color){
   colorList.appendChild(colorPickerDiv);      
 }
 
-function addRandomColor(){
-  addColor(getRandomColor())
+function addRandomColorPicker(){
+  addColorPicker(getRandomColor())
 }
 
 function getRandomColor() {
@@ -72,12 +68,22 @@ function getRandomColor() {
   return color;
 }
 
+//TEST
+function testGetRandomColor(){
+  let testColor = getRandomColor();
+  let testExp = new RegExp("#([0-9]|[A-F]){6}");
+  if (!testExp.test(testColor)){
+    throw new Error("Randomly generated hex color is in the wrong format");
+  }
+}
+testGetRandomColor();
+
 function duplicateColor(el){
   colorDiv = el.parentNode
   children = colorDiv.childNodes
   for(let j = 0; j < children.length; j++){
     if(children[j].nodeName == "INPUT"){
-      addColor(children[j].value)
+      addColorPicker(children[j].value)
     }
   }
 }
@@ -101,7 +107,12 @@ function refreshInput(){
   }
 }
 
-function generate(){
+function generateGrid(){
+
+  let grid = new Array(24);
+  for (let i = 0; i < grid.length; i++) { 
+    grid[i] = new Array(21); 
+  } 
 
   for(let y = 0; y < blanketHeight; y++){
     for(let x = 0; x < blanketWidth; x++){
@@ -115,7 +126,7 @@ function generate(){
         adjacentColors.push(grid[x-1][y])
       }
 
-      availableColors = adjacentColors.concat(colors);
+      let availableColors = adjacentColors.concat(colors);
       
       let randomColour = Math.floor(Math.random() * availableColors.length);
       let randColour = availableColors[randomColour]
@@ -123,9 +134,11 @@ function generate(){
       grid[x][y] = randColour;
     }
   }
+
+  return grid
 }
 
-function printGrid(){
+function printGrid(grid){
   background(100);
   
   const SCALE = 3;
@@ -160,20 +173,20 @@ function loadGrid(){
   reader.readAsText(selectedFile)
 
   reader.onload = function(event) {
-    grid = JSON.parse(event.target.result);
+    let grid = JSON.parse(event.target.result);
 
     blanketWidth = grid.length;
     blanketHeight = grid[0].length;
 
     console.log(grid);
-    printGrid();
+    printGrid(grid);
   }
 }
 
 function regenerate(){
   refreshInput();
-  generate();
-  printGrid();
+  let grid = generateGrid();
+  printGrid(grid);
   return false;
 }
   
